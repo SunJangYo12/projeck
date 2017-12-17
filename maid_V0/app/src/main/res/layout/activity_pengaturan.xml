@@ -1,0 +1,50 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+	android:gravity="center"
+    android:orientation="vertical">
+	<TextView
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:id="@+id/database"/>
+	<Switch
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:enabled="true"
+		android:textOff="OFF"
+		android:text="LockScreen"
+		android:textOn="ON"
+		android:id="@+id/swLock"/>
+	<Switch
+		android:layout_marginBottom="60dp"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textOff="OFF"
+		android:text="NotiCatatan"
+		android:textOn="ON"
+		android:id="@+id/swCat"/>
+	<Switch
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textOff="OFF"
+		android:text="NotiVolt"
+		android:textOn="ON"
+		android:id="@+id/swNv"/>
+	<Switch
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textOff="OFF"
+		android:text="NotiTemp"
+		android:textOn="ON"
+		android:id="@+id/swNt"/>
+	<Switch
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textOff="OFF"
+		android:text="NotiAmp"
+		android:textOn="ON"
+		android:id="@+id/swNa"/>
+	
+	
+    
+</LinearLayout>
