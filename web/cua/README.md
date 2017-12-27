@@ -1,0 +1,1 @@
+#Temporary Fix For Yahoo Requiring OAuth on YQL Weather
