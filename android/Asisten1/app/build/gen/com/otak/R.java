@@ -11,10 +11,60 @@ public final class R {
     public static final class attr {
     }
     public static final class drawable {
-        public static final int ic_launcher=0x7f020000;
+        public static final int catatan=0x7f020000;
+        public static final int compas=0x7f020001;
+        public static final int directory_icon=0x7f020002;
+        public static final int directory_up=0x7f020003;
+        public static final int file_icon=0x7f020004;
+        public static final int ic_launcher=0x7f020005;
+        public static final int icon=0x7f020006;
+        public static final int iris=0x7f020007;
+        public static final int setting=0x7f020008;
+        public static final int trans=0x7f020009;
+        public static final int transm=0x7f02000a;
+    }
+    public static final class id {
+        public static final int TextView01=0x7f060010;
+        public static final int TextView02=0x7f060011;
+        public static final int TextViewDate=0x7f060012;
+        public static final int aButton=0x7f060009;
+        public static final int aEdit=0x7f060008;
+        public static final int alat=0x7f06001b;
+        public static final int alert_cariOke=0x7f060001;
+        public static final int alert_edCari=0x7f060000;
+        public static final int alert_list=0x7f060002;
+        public static final int alert_maju=0x7f060004;
+        public static final int alert_mundur=0x7f060003;
+        public static final int dir=0x7f060015;
+        public static final int fd_Icon1=0x7f06000f;
+        public static final int image=0x7f060018;
+        public static final int imageViewCompass=0x7f06000e;
+        public static final int layout=0x7f060017;
+        public static final int list_item=0x7f06000a;
+        public static final int main=0x7f06001c;
+        public static final int main_btn=0x7f06000c;
+        public static final int main_text=0x7f06000b;
+        public static final int mulut=0x7f060014;
+        public static final int rg=0x7f060005;
+        public static final int rg1=0x7f060006;
+        public static final int rg2=0x7f060007;
+        public static final int run_service=0x7f060016;
+        public static final int telinga=0x7f060013;
+        public static final int text=0x7f06001a;
+        public static final int title=0x7f060019;
+        public static final int toast=0x7f06001d;
+        public static final int tvHeading=0x7f06000d;
     }
     public static final class layout {
-        public static final int main=0x7f030000;
+        public static final int alert_file=0x7f030000;
+        public static final int alert_telinga=0x7f030001;
+        public static final int file_find=0x7f030002;
+        public static final int main=0x7f030003;
+        public static final int main_compas=0x7f030004;
+        public static final int main_fileexploler=0x7f030005;
+        public static final int main_pengaturan=0x7f030006;
+        public static final int notifi=0x7f030007;
+        public static final int toast=0x7f030008;
     }
     public static final class string {
         public static final int app_name=0x7f040000;
