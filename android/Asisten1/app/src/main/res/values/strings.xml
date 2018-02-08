@@ -3,5 +3,15 @@
 
     <string name="app_name">Asisten</string>
     <string name="hello_world">Hello world!</string>
-
+	<string name="disp_wifi">Wifi</string>
+    <string name="disp_cell">Cell</string>  
+    <string name="disp_cpu">CPU load</string>
+    <string name="disp_cpu_type"> (app/kernel)</string>
+    <string name="disp_battery">Battery</string>
+    <string name="disp_name">Name</string>
+    <string name="disp_type">Speed</string>
+    <string name="disp_in">Bytes in</string>
+    <string name="disp_out">Bytes out</string>  
+    <string name="disp_user">apps</string>
+    <string name="disp_system">kernel</string>
 </resources>

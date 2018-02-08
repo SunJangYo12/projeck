@@ -15,21 +15,24 @@ import android.media.*;
 import com.otak.init.*;
 import com.tools.*;
 import android.view.*;
+import com.status.*;
+import android.graphics.*;
 
 
 public class MainAsisten extends Activity
 { 
 	public String text;
 	public SpeechRecognizer micApi;
-	public static String suara;
+	
 	Intent intent, intentMic, intentTTS;
 	public String dataSuara;
 	Vibrator mVibrator;
-	private MicApi mSpeechManager;
+	private static String[] dataSpeech;
+	private static String temp;
 	SharedPreferences settings;
-	MicHelper micHelper;
+	
 	ServiceTTS sertt;
-	TextView mText;
+	TextView txt;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -37,10 +40,12 @@ public class MainAsisten extends Activity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		startService(new Intent(this, ServiceBoot.class));
+		startService(new Intent(this, ServiceStatus.class));
 		
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		mVibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
-		TextView txt = (TextView)findViewById(R.id.main_text);
+	    txt = (TextView)findViewById(R.id.main_text);
+		
 		Button btn = (Button)findViewById(R.id.main_btn);
 		
 		btn.setOnClickListener(new View.OnClickListener()
@@ -68,6 +73,7 @@ public class MainAsisten extends Activity
 				intentV.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 				micApi.startListening(intentV);
 			}
+		
 		}
 		catch(Exception e){
 			mVibrator.vibrate(400);
@@ -108,6 +114,14 @@ public class MainAsisten extends Activity
 			startService(new Intent(this, ServiceMicHelper.class));
 		}
 	}
+	
+	public void ngomong(String data, float cepat)
+	{
+		sertt.cepat = cepat;
+		sertt.str = data;
+		startService(new Intent(this, ServiceTTS.class));
+	}
+	
 
 	public String getWeton(int index){
 		final KalenderKu kal = new KalenderKu();  
@@ -121,148 +135,28 @@ public class MainAsisten extends Activity
 		return jawa[index];
 	}
 
-	public void keluaran(String dataText)
+	public void keluaran(String data)
 	{
-		String[] dtts = dataText.split(" ");
+		dataSpeech = data.split(" ");
+		temp = "";
 		
-		String temp = "";
-		
-		for (int a=0; a<dtts.length; a++)
+		for (int a=0; a<dataSpeech.length; a++)
 		{
-			
-			if(dtts[a].equals("hari")){
-				sertt.cepat = 0.8f;
-				sertt.str = getWeton(0)+","+getWeton(4);
-				startService(new Intent(this, ServiceTTS.class));
-				temp = "hari";
-				CountDownTimer hitungMundur = new CountDownTimer(3000, 100)
-				{
-					public void onTick(long millisUntilFinished){
-					}
-					public void onFinish()
-					{
-						finish();
-					}
-				}.start();
-			}
-
-			if(dtts[a].equals("tanggal")){
-				String tanggal = new SimpleDateFormat("  ,dd,MMM,yyy").format(new Date());
-				sertt.cepat = 0.8f;
-				sertt.str = getWeton(0)+","+tanggal;
-				startService(new Intent(this, ServiceTTS.class));
-
-				temp = "tanggal";
-				CountDownTimer hitungMundur = new CountDownTimer(3000, 100)
-				{
-					public void onTick(long millisUntilFinished){
-					}
-					public void onFinish()
-					{
-						finish();
-					}
-				}.start();
-			}
-			if(dtts[a].equals("jam")){
-				String jam = new SimpleDateFormat("HH,mm").format(new Date());
-				sertt.cepat = 0.8f;
-				sertt.str = jam;
-				startService(new Intent(this, ServiceTTS.class));
-
-				temp = "jam";
-				CountDownTimer hitungMundur = new CountDownTimer(3000, 100)
-				{
-					public void onTick(long millisUntilFinished){
-					}
-					public void onFinish()
-					{
-						finish();
-					}
-				}.start();
-			}
-			if(dtts[a].equals("file"))
-			{
-				temp = "file";
-				String tempFile = "";
-				String[] format ={"zip","rar","dltemp","mp4","mp3","jpg","wav","mht","txt","pdf","doc"};
-				
-				for(int c=0; c<dtts.length; c++)
-				{
-					if (dtts[c].equals("cari")){
-						for (int d=0; d<dtts.length; d++)
-						{
-							tempFile = "cari";
-							
-							if (dtts[d].equals("bernama")){
-								for (int e=0; e<dtts.length; e++)
-								{
-									sertt.cepat = 0.8f;
-									sertt.str = "file ,"+dtts[3]+", sedang di cari, tuan";
-									startService(new Intent(this, ServiceTTS.class));
-									
-									Intent hIntent = new Intent(MainAsisten.this, FileExploler.class);
-									try
-									{
-										if (dtts[4].equals("external")){
-											hIntent.putExtra("folder","external");
-										}
-									}
-									catch(Exception l){}
-									hIntent.putExtra("isi",dtts[3]);
-									hIntent.putExtra("index","cari nama");
-									startActivity(hIntent);
-								}
-							}
-							else if (dtts[d].equals("format")){
-								for (int e=0; e<dtts.length; e++)
-								{
-									for (int fe=0; fe<format.length; fe++)
-									{
-										if (dtts[e].equals(format[fe])){
-											sertt.cepat = 0.8f;
-											sertt.str = "file, "+format[fe]+", sedang di cari, tuan";
-											startService(new Intent(this, ServiceTTS.class));
-											
-											Intent hIntent = new Intent(MainAsisten.this, FileExploler.class);
-											try
-											{
-												if (dtts[4].equals("external")){
-													hIntent.putExtra("folder","external");
-												}
-											}
-											catch(Exception l){}
-											hIntent.putExtra("format",format[fe]);
-											hIntent.putExtra("index","cari format");
-											startActivity(hIntent);
-										}
-									}
-								}
-								
-							}
-						}
-								
-					}
-				}
-				for(int c=0; c<dtts.length; c++)
-				{
-					if (dtts[c].equals("buka")){
-						for (int d=0; d<dtts.length; d++)
-						{
-							
-						}
-					}
-				}
-				if (tempFile.equals("")){
-					startActivity(new Intent(MainAsisten.this, FileExploler.class));
-				}
-			}// for c
-		} // if file
-		if (temp.equals("")) {
-			sertt.cepat = 1.0f;
-			sertt.str = "saya nggak dengar, tuan";
-			startService(new Intent(this, ServiceTTS.class));
-
-			temp = "";
+			outHari(a);
+			outTanggal(a);
+			outStatus(a);
+			outJam(a);
+			outFile(a);
+		}
+	
+	
+	}
+	
+	private void outHari(int index)
+	{
+		if(dataSpeech[index].equals("hari")){
+			ngomong(getWeton(0)+","+getWeton(4), 0.8f);
+			temp = "hari";
 			CountDownTimer hitungMundur = new CountDownTimer(3000, 100)
 			{
 				public void onTick(long millisUntilFinished){
@@ -274,6 +168,142 @@ public class MainAsisten extends Activity
 			}.start();
 		}
 	}
+	private void outTanggal(int index)
+	{
+		if(dataSpeech[index].equals("tanggal")){
+			String tanggal = new SimpleDateFormat("  ,dd,MMM,yyy").format(new Date());
+			
+			ngomong(getWeton(0)+","+tanggal, 0.8f);
+			temp = "tanggal";
+			CountDownTimer hitungMundur = new CountDownTimer(3000, 100)
+			{
+				public void onTick(long millisUntilFinished){
+				}
+				public void onFinish()
+				{
+					finish();
+				}
+			}.start();
+		}
+	}
+	private void outStatus(int index)
+	{
+		if (dataSpeech[index].equals("status")){
+			temp = "status";
+			String tempStatus = "";
+			for (int b=0; b<dataSpeech.length; b++)
+			{
+				if (dataSpeech[b].equals("proses")){
+					tempStatus = "cpu";
+					ngomong(new CpuMon().cpuPakai+", tuan", 0.8f);
+				}
+				if (dataSpeech[b].equals("aplikasi")){
+					tempStatus = "aplikasi";
+					ngomong("ini status aplikasi yang berjalan, tuan", 0.8f);
+					startActivity(new Intent(this, TaskList.class));
+				}
+			}
+			if (tempStatus.equals("")){
+				ngomong("status ponsel ditampilkan", 0.8f);
+				startActivity(new Intent(this, ActivityStatus.class));
+			}
+		}
+	}
+	
+	private void outJam(int index)
+	{
+		if (dataSpeech[index].equals("jam")){
+			String jam = new SimpleDateFormat("HH,mm").format(new Date());
+			ngomong(jam,0.8f);
+			
+			temp = "jam";
+			CountDownTimer hitungMundur = new CountDownTimer(3000, 100)
+			{
+				public void onTick(long millisUntilFinished){
+				}
+				public void onFinish()
+				{
+					finish();
+				}
+			}.start();
+		}
+	}
+	private void outFile(int index)
+	{
+		if(dataSpeech[index].equals("file"))
+		{
+			temp = "file";
+			String tempFile = "";
+			String[] format ={"zip","rar","dltemp","mp4","mp3","jpg","wav","mht","txt","pdf","doc"};
+
+			for(int c=0; c<dataSpeech.length; c++)
+			{
+				if (dataSpeech[c].equals("cari")){
+					for (int d=0; d<dataSpeech.length; d++)
+					{
+						tempFile = "cari";
+
+						if (dataSpeech[d].equals("bernama")){
+							Intent inama = new Intent(MainAsisten.this, FileExploler.class);
+							txt.setText("Tunggu...");
+							txt.setTextColor(Color.RED);
+							txt.setTextSize(80);
+							
+							String ngomongMemori = "";
+							for (int e=0; e<dataSpeech.length; e++)
+							{
+								inama.putExtra("isi",dataSpeech[3]);
+							}
+							
+							try{
+								inama.putExtra("memori","ex");
+								ngomongMemori = "di External memori";
+							}
+							catch(Exception h){}
+							
+							ngomong("file "+dataSpeech[3]+", sedang dicari "+ngomongMemori,0.8f);
+							
+							inama.putExtra("index","cari nama");
+							startActivity(inama);
+						}
+						else if (dataSpeech[d].equals("format")){
+							for (int e=0; e<dataSpeech.length; e++)
+							{
+								for (int fe=0; fe<format.length; fe++)
+								{
+									if (dataSpeech[e].equals(format[fe])){
+										txt.setText("Tunggu...");
+										txt.setTextColor(Color.RED);
+										txt.setTextSize(80);
+										
+										Intent iformat = new Intent(MainAsisten.this, FileExploler.class);
+										String ngomongMemori = "";
+										try{
+											iformat.putExtra("memori","ex");
+											ngomongMemori = "di External memori";
+										}
+										catch(Exception h){}
+										ngomong("file "+format[fe]+", sedang dicari "+ngomongMemori, 0.8f);
+										
+										iformat.putExtra("format",format[fe]);
+										iformat.putExtra("index","cari format");
+										startActivity(iformat);
+									}
+								}
+							}
+
+						}
+					}
+
+				}
+			}
+
+			if (tempFile.equals("")){
+				startActivity(new Intent(MainAsisten.this, FileExploler.class));
+			}
+		}// for c
+	}
+	
 }
 
 
@@ -286,24 +316,26 @@ class VoiceHelper implements RecognitionListener
 	}
 	public void onResults(Bundle data) {
 		ArrayList<String> matches = data.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-		mVoiceRecognition.text = matches.get(0);
+		mVoiceRecognition.txt.setText(matches.get(0));
 		mVoiceRecognition.keluaran(matches.get(0));
 	}
 
 	public void onBeginningOfSpeech() {
-		mVoiceRecognition.text = "Good!";
+		mVoiceRecognition.txt.setText("Good!");
+		mVoiceRecognition.txt.setTextColor(Color.WHITE);
+		mVoiceRecognition.txt.setTextSize(50);
 	}
 	public void onBufferReceived(byte[] buffer) {
 		//Log.d(TAG, "onBufferReceived");
 	}
 	public void onEndOfSpeech() {
 		//Log.d(TAG, "onEndofSpeech");
-		mVoiceRecognition.text = "emm";
+		mVoiceRecognition.txt.setText("emm");
 		
 	}
 	public void onError(int error) {
 		//Log.d(TAG, "error " + error);		
-		mVoiceRecognition.text = "error " + error;
+		mVoiceRecognition.txt.setText("error " + error);
 		mVoiceRecognition.keluaran("eror");
 	}
 	public void onEvent(int eventType, Bundle params) {

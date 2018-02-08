@@ -65,14 +65,6 @@ public class Kompas extends Activity implements SensorEventListener {
         mSensorManager.unregisterListener(this);
     }
 
-	@Override
-	protected void onDestroy()
-	{
-		// TODO: Implement this method
-		super.onDestroy();
-		s.runingKu();
-	}
-
     @Override
     public void onSensorChanged(SensorEvent event) {
 

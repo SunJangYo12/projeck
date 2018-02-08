@@ -20,6 +20,7 @@ import android.view.LayoutInflater;
 import android.view.Gravity;
 import com.otak.input.MicHelper;
 import android.os.*;
+import com.status.*;
 
 public class ReceiverBoot extends BroadcastReceiver
 {
@@ -76,6 +77,7 @@ public class ReceiverBoot extends BroadcastReceiver
 		ServiceMicHelper sh = new ServiceMicHelper();
 		SharedPreferences settings = context.getSharedPreferences("Settings", 0);	
 		
+		// off
 		if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF))
 		{
 			if (settings.getBoolean("Mic Control", false)){
@@ -84,6 +86,7 @@ public class ReceiverBoot extends BroadcastReceiver
 				layar = 1;
 			}
 		}
+		// on
 		if (intent.getAction().equals(Intent.ACTION_SCREEN_ON))
 		{
 			if (settings.getBoolean("Mic Control", false)){
@@ -113,9 +116,10 @@ public class ReceiverBoot extends BroadcastReceiver
 		contentView.setImageViewResource(R.id.alat, R.drawable.compas);
 		contentView.setImageViewResource(R.id.main, R.drawable.icon);
 		contentView.setTextViewText(R.id.title, asisten.getWeton(4));
-		contentView.setTextViewText(R.id.text, new StringBuilder().append("-Volt    : "+volt)
+		contentView.setTextViewText(R.id.text, new StringBuilder().append("-Volt    : "+volt+"\t\t\t -Cpu  :  "+new CpuMon().cpuPakai)
 									.append("\n-Arus  : "+amp)
-									.append("\n-Temp : "+temp));
+									.append("\n-Temp : "+temp)
+								    );
 									
 		contentView.setOnClickPendingIntent(R.id.image, pengp);
 		contentView.setOnClickPendingIntent(R.id.alat, kompp);

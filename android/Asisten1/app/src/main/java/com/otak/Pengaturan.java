@@ -8,6 +8,7 @@ import android.content.*;
 import android.speech.tts.*;
 import java.util.*;
 import com.tools.*;
+import com.status.*;
 
 public class Pengaturan extends Activity
 {
@@ -71,7 +72,7 @@ public class Pengaturan extends Activity
 			{
 				public void onClick(View v){
 					//telinga(3);
-					startActivity(new Intent(Pengaturan.this, FileExploler.class));
+					startActivity(new Intent(Pengaturan.this, ActivityStatus.class));
 				
 				}
 			});

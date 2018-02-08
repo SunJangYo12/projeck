@@ -29,6 +29,7 @@ import android.content.*;
 import android.view.*;
 import android.widget.AdapterView.*;
 import android.net.*;
+import com.otak.*;
 
 public class FileExploler extends ListActivity
 {
@@ -59,44 +60,54 @@ public class FileExploler extends ListActivity
 			o = adapter.getItem(position);
 			String folder ="sdcard0";
 			try{
-				if (getIntent().getStringExtra("folder").equals("external")){
+				if (getIntent().getStringExtra("memori").equals("ex"))
+				{
 					folder = "sdcard1";
 				}
 			}
-			catch(Exception f){
-				
-			}
+			catch(Exception j){}
 			
 			if(getIntent().getStringExtra("index").equals("cari format")){
 				String command = exe.Executer("find /storage/"+folder+"/ -name *."+getIntent().getStringExtra("format"));
 				hasilFind = command.split("\n");
-
-				AlertDialog.Builder builder = new AlertDialog.Builder(FileExploler.this);
-				builder.setTitle("Hasil Cari file format");
-				builder.setItems(hasilFind, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int item) {
-							String format = hasilFind[item];
-							onCariClick(format);
-						}
-					});
-				builder.create().show();
+				
+				if (new ReceiverBoot().layar == 1){
+					Intent main = new Intent(this, MainAsisten.class);
+					main.putExtra("startDengar","");
+					startActivity(main);
+				}
+				else {
+					ngomong("pencarian file format"+getIntent().getStringExtra("format")+", selesai", 0.8f);
+					
+					outCari("format "+getIntent().getStringExtra("format"));
+				}
+				
 			}
 			else if (getIntent().getStringExtra("index").equals("cari nama")){
 				String command = exe.Executer("find /storage/"+folder+"/ -iname *"+getIntent().getStringExtra("isi")+"*");
 				hasilFind = command.split("\n");
-
-				AlertDialog.Builder builder = new AlertDialog.Builder(FileExploler.this);
-				builder.setTitle("Hasil Cari file dengan Nama");
-				builder.setItems(hasilFind, new DialogInterface.OnClickListener() {
-						public void onClick(DialogInterface dialog, int item) {
-							String nama = hasilFind[item];
-							onCariClick(nama);
-						}
-					});
-				builder.create().show();
+				
+				if (new ReceiverBoot().layar == 1){
+					Intent main = new Intent(this, MainAsisten.class);
+					main.putExtra("startDengar","");
+					startActivity(main);
+				}
+				else {
+					ngomong("pencarian file bernama"+getIntent().getStringExtra("isi")+", selesai", 0.8f);
+					
+					outCari("nama "+getIntent().getStringExtra("isi"));
+				}
 			}
 		}catch(Exception g){}
     }
+	
+	public void ngomong(String data, float cepat)
+	{
+		ServiceTTS sertt = new ServiceTTS();
+		sertt.cepat = cepat;
+		sertt.str = data;
+		startService(new Intent(this, ServiceTTS.class));
+	}
     private void fill(File f)
     {
         File[]dirs = f.listFiles();
@@ -172,9 +183,9 @@ public class FileExploler extends ListActivity
 			public void onClick(View v)
 			{
 				String[] aksi ={"Directory","Format","Nama","ukuran"};
-				AlertDialog.Builder builder = new AlertDialog.Builder(FileExploler.this);
-				builder.setTitle("pilih aksi");
-				builder.setItems(aksi, new DialogInterface.OnClickListener() {
+				AlertDialog.Builder builderIndex = new AlertDialog.Builder(FileExploler.this);
+				builderIndex.setTitle("pilih aksi");
+				builderIndex.setItems(aksi, new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int item) {
 							if(item == 0){
 								if (edCari.getText().toString().equals("")){
@@ -184,15 +195,7 @@ public class FileExploler extends ListActivity
 									String command = exe.Executer("find "+o.getPath()+"/ -name "+edCari.getText().toString());
 									hasilFind = command.split("\n");
 
-									AlertDialog.Builder builder = new AlertDialog.Builder(FileExploler.this);
-									builder.setTitle("Hasil Cari folder");
-									builder.setItems(hasilFind, new DialogInterface.OnClickListener() {
-											public void onClick(DialogInterface dialog, int item) {
-												String folder = hasilFind[item];
-												onCariClick(folder);
-											}
-										});
-									builder.create().show();
+									outCari("directori");
 								}
 							}
 							else if (item == 1){
@@ -202,16 +205,7 @@ public class FileExploler extends ListActivity
 								else {
 									String command = exe.Executer("find "+o.getPath()+"/ -name *."+edCari.getText().toString());
 									hasilFind = command.split("\n");
-
-									AlertDialog.Builder builder = new AlertDialog.Builder(FileExploler.this);
-									builder.setTitle("Hasil Cari file format");
-									builder.setItems(hasilFind, new DialogInterface.OnClickListener() {
-											public void onClick(DialogInterface dialog, int item) {
-												String format = hasilFind[item];
-												onCariClick(format);
-											}
-										});
-									builder.create().show();
+									outCari("format");
 								}
 							}
 							else if (item == 2){
@@ -221,16 +215,7 @@ public class FileExploler extends ListActivity
 								else {
 									String command = exe.Executer("find "+o.getPath()+"/ -iname *"+edCari.getText().toString()+"*");
 									hasilFind = command.split("\n");
-
-									AlertDialog.Builder builder = new AlertDialog.Builder(FileExploler.this);
-									builder.setTitle("Hasil Cari file dengan Nama");
-									builder.setItems(hasilFind, new DialogInterface.OnClickListener() {
-											public void onClick(DialogInterface dialog, int item) {
-												String nama = hasilFind[item];
-												onCariClick(nama);
-											}
-										});
-									builder.create().show();
+									outCari("nama");
 								}
 							}
 							else if (item == 3){
@@ -242,21 +227,12 @@ public class FileExploler extends ListActivity
 		
 									String command = exe.Executer("find "+o.getPath()+"/ "+edCari.getText().toString());
 									hasilFind = command.split("\n");
-
-									AlertDialog.Builder builder = new AlertDialog.Builder(FileExploler.this);
-									builder.setTitle("Hasil Cari file dengan ukuran");
-									builder.setItems(hasilFind, new DialogInterface.OnClickListener() {
-											public void onClick(DialogInterface dialog, int item) {
-												String size = hasilFind[item];
-												onCariClick(size);
-											}
-										});
-									builder.create().show();
+									outCari("size");
 								}
 							}
 						}
 					});
-				builder.create().show();
+				builderIndex.create().show();
 				
 			}
 		});
@@ -273,7 +249,7 @@ public class FileExploler extends ListActivity
 					fill(currentDir);
 				}
 				else {
-					onFileClick(o);
+					bukaText(o);
 				}
 				alert11.cancel();
 			}
@@ -289,7 +265,7 @@ public class FileExploler extends ListActivity
 						fill(currentDir);
 					}
 					else {
-						onFileClick(o);
+						bukaText(o);
 					}
 					alert11.cancel();
 				}
@@ -305,7 +281,7 @@ public class FileExploler extends ListActivity
 					Item o = adapter.getItem(position);
 					
 					if (item == 0){
-						onFileClick(o);
+						bukaText(o);
 					}
 					if (item == 1){
 						Intent intent = new Intent(Intent.ACTION_VIEW);
@@ -321,31 +297,39 @@ public class FileExploler extends ListActivity
 		
 	}
 	
-	
-	// output
-	private void onFileClick(Item o)
-    {
-		Toast.makeText(this, ""+o.getPath(),Toast.LENGTH_LONG).show();
-		String command = exe.Executer("cat "+o.getPath());
-		String[] hasil = command.split("\n\n");
+	private void outCari(String title)
+	{
 		AlertDialog.Builder builder = new AlertDialog.Builder(FileExploler.this);
 
-		builder.setTitle("Hasil Buka Text");
-		builder.setItems(hasil, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int item) {
-				}
-			});
+		LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE );
+		View layoutR = inflater.inflate(R.layout.alert_file_find_result, null);
+
+		ListView li = (ListView)layoutR.findViewById(R.id.alert_file_find_r);
+		li.setAdapter(new ArrayAdapter(getBaseContext(), android.R.layout.simple_list_item_1, hasilFind));
+		li.setSelected(true);
+		li.setOnItemClickListener(new OnItemClickListener()
+			{
+				public void onItemClick(AdapterView arg0, View arg1, int item, long arg3)
+				{
+					String format = hasilFind[item];
+					pilihClick(format);
+				}});
+		((ArrayAdapter)li.getAdapter()).notifyDataSetInvalidated();
+		builder.setTitle("hasil cari dengan : "+title);
+		builder.setView(layoutR);
 		builder.create().show();
-    }
-	private void onCariClick(String result)
+	}
+	
+	private void pilihClick(String result)
     {
 		hasil = result;
 		String[] index ={"Text","Intent"};
-		
-		AlertDialog.Builder builder = new AlertDialog.Builder(FileExploler.this);
-		builder.setTitle("Pilih Aksi");
-		builder.setItems(index, new DialogInterface.OnClickListener()
-		{
+
+		AlertDialog.Builder builder1 = new AlertDialog.Builder(FileExploler.this);
+		builder1.setTitle("Pilih Aksi");
+		builder1.setCancelable(true);
+		builder1.setItems(index, new DialogInterface.OnClickListener()
+			{
 				public void onClick(DialogInterface dialog, int item) {
 					if (item == 0){
 						String command = exe.Executer("cat "+hasil);
@@ -364,11 +348,28 @@ public class FileExploler extends ListActivity
 						intent.setDataAndType(Uri.parse("file://"+hasil), "*/*");
 						startActivity(intent);
 					}
-				
+
 				}
 			});
-		builder.create().show();
+		builder1.create().show();
     }
+	
+	// output
+	private void bukaText(Item o)
+    {
+		Toast.makeText(this, ""+o.getPath(),Toast.LENGTH_LONG).show();
+		String command = exe.Executer("cat "+o.getPath());
+		String[] hasil = command.split("\n\n");
+		AlertDialog.Builder builder1 = new AlertDialog.Builder(FileExploler.this);
+		builder1.setCancelable(true);
+		builder1.setTitle("Hasil Buka Text");
+		builder1.setItems(hasil, new DialogInterface.OnClickListener() {
+				public void onClick(DialogInterface dialog, int item) {
+				}
+			});
+		builder1.create().show();
+    }
+	
 }
 
 class FileArrayAdapter extends ArrayAdapter<Item>{

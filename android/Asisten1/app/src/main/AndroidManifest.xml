@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.otak" >
-	
+    package="com.otak"
+	android:versionName="1.1">
 	<uses-permission android:name="android.permission.RECORD_AUDIO" />
 	<uses-permission android:name="android.permission.CAMERA" />
 	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
 	<uses-permission android:name="android.permission.VIBRATE" />
-
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	
 	<application
         android:allowBackup="true"
         android:icon="@drawable/icon"
@@ -20,6 +22,12 @@
 		<activity
 			android:label="@string/app_name"
 			android:name="com.tools.FileExploler" >
+		</activity>
+		<activity
+			android:name="com.status.ActivityStatus" >
+		</activity>
+		<activity
+			android:name="com.status.TaskList" >
 		</activity>
         <activity
             android:name=".MainAsisten"
@@ -40,6 +48,10 @@
 		<service
 			android:name=".ServiceTTS">
 		</service>
+		<service
+			android:name="com.status.ServiceStatus">
+		</service>
+		
 		<receiver
 			android:name=".ReceiverBoot">
 			<intent-filter>
