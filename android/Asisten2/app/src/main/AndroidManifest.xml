@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.otak"
+	android:versionName="1.1">
+	<uses-permission android:name="android.permission.RECORD_AUDIO" />
+	<uses-permission android:name="android.permission.CAMERA" />
+	<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+	<uses-permission android:name="android.permission.READ_PHONE_STATE" />
+	<uses-permission android:name="android.permission.VIBRATE" />
+	<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+	<uses-permission android:name="android.permission.INTERNET"/>
+	<application
+        android:allowBackup="true"
+        android:icon="@drawable/icon"
+        android:label="@string/app_name"
+        android:theme="@android:style/Theme.Translucent.NoTitleBar"
+		android:resizeableActivity = "true">
+		<activity
+			android:name="com.tools.Kompas" >
+		</activity>
+		<activity
+			android:label="@string/app_name"
+			android:name="com.tools.FileExploler" >
+		</activity>
+		<activity
+			android:name="com.status.ActivityStatus" >
+		</activity>
+		<activity
+			android:name="com.status.TaskList" >
+		</activity>
+		<activity
+			android:name="MainAsisten" >
+		</activity>
+		<activity
+			android:name=".ScreenOn" >
+		</activity>
+        <activity
+            android:name=".Pengaturan"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+		<service
+			android:name=".ServiceBoot">
+		</service>
+		<service
+			android:name=".ServiceMicHelper">
+		</service>
+		<service
+			android:name=".ServiceTTS">
+		</service>
+		<service
+			android:name="com.status.ServiceStatus">
+		</service>
+		
+		<receiver
+			android:name=".ReceiverBoot">
+			<intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+		</receiver>
+	
+	
+    </application>
+
+</manifest>

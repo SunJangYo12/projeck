@@ -1,0 +1,39 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+	android:background="#ffD4D4D4"
+	android:gravity="center"
+    android:orientation="vertical">
+	<Button
+		android:id="@+id/telinga"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Telinga sensitif"/>
+    <Button
+		android:layout_marginTop="30dp"
+		android:id="@+id/mulut"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Bicara sensitif"/>
+	<Button
+		android:layout_marginTop="30dp"
+		android:id="@+id/dir"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:text="Atur directory"/>
+
+	<Switch
+		android:layout_marginTop="30dp"
+		android:id="@+id/run_service"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textColor="#000000"
+		android:text="Mic Service"/>
+	<Switch
+		android:layout_marginTop="30dp"
+		android:id="@+id/mute"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"
+		android:textColor="#000000"
+		android:text="suara"/>
+</LinearLayout>
