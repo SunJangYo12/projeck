@@ -24,6 +24,8 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import java.io.*;
 import android.util.*;
+import android.content.pm.*;
+import com.otak.memori.*;
 
 public class MainAsisten extends Activity
 { 
@@ -34,15 +36,19 @@ public class MainAsisten extends Activity
 	public String dataSuara;
 	Vibrator mVibrator;
 	private static String[] dataSpeech;
+	private String dataSpeech1;
 	private static String temp;
 	SharedPreferences settings;
+	SharedPreferences.Editor addSettings;
 	
 	ServiceTTS sertt;
 	TextView txt;
 	Button btn;
 	String ulangi, ngobrol;
-	private String surl = "https://sunjangyo12.000webhostapp.com/cuaca_cool1.php/";
+	private String surl = "https://sunjangyo12.000webhostapp.com/cuaca.php/";
 	protected AudioManager mAudioManager;
+	private DBHelper dbhelper;
+	int judul = 0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -51,6 +57,7 @@ public class MainAsisten extends Activity
 		setContentView(R.layout.main);
 		
 		settings = getSharedPreferences("Settings", 0);	
+		addSettings = settings.edit();
 		
 		mVibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
 	    txt = (TextView)findViewById(R.id.main_text);
@@ -102,6 +109,19 @@ public class MainAsisten extends Activity
 	{
 		// TODO: Implement this method
 		super.onPause();
+	}
+
+	@Override
+	public void onBackPressed()
+	{
+		// TODO: Implement this method
+		super.onBackPressed();
+		if(mSpeechManager!=null)
+		{
+			Toast.makeText(this,"destroy", Toast.LENGTH_LONG).show();
+			mSpeechManager.destroy();
+			mSpeechManager = null;
+		}
 	}
 
 	@Override
@@ -181,6 +201,7 @@ public class MainAsisten extends Activity
 	public void keluaran(String data)
 	{
 		dataSpeech = data.split(" ");
+		dataSpeech1 = data;
 		temp = "";
 		
 		for (int a=0; a<dataSpeech.length; a++)
@@ -197,10 +218,17 @@ public class MainAsisten extends Activity
 	{
 		if (dataSpeech[index].equals("cuaca"))
 		{
-			CallWebPageTask task = new CallWebPageTask();
-			task.applicationContext = MainAsisten.this;
-			String url = surl+"?user="+"txtUser.getText().toString()"+"&password="+"txtPassword.getText().toString()";
-			task.execute(new String[] { url });
+			// antri
+			for(int a=0; a<dataSpeech.length; a++){
+				if (dataSpeech[a].equals("di"))
+				{
+					CallWebPageTask task = new CallWebPageTask();
+					task.applicationContext = MainAsisten.this;
+					String url = surl+"?negara="+"indonesia"+"&tempat="+"";
+					task.execute(new String[] { url });
+					
+				}
+			}	
 		}
 		if(dataSpeech[index].equals("hari")){
 			txt.setText(getWeton(0)+","+getWeton(4));
@@ -272,7 +300,7 @@ public class MainAsisten extends Activity
 
 	private void outNgobrol(int index)
 	{
-		
+	
 		if (dataSpeech[index].equals("halo")){
 			ngomong("ya halo selamat malam mas", 0.9f);
 		}
@@ -283,6 +311,37 @@ public class MainAsisten extends Activity
 		if (dataSpeech[index].equals("istirahat")){
 			ngomong("sistem stenbay", 0.9f);
 			finish();
+		}
+		if (dataSpeech[index].equals("buku")){
+			if (openApp(this, "org.kiwix.kiwixmobile")){
+				startActivity(new Intent(this,MemRiwayat.class));
+			
+				Toast.makeText(this,"sukses",Toast.LENGTH_LONG).show();
+			}
+			else{
+				Toast.makeText(this,"buku gagal",Toast.LENGTH_LONG).show();
+				
+			}
+		}
+		if (dataSpeech[index].equals("riwayat")){
+			dbhelper = new DBHelper(getApplicationContext());
+		
+			for (int a=0; a<dataSpeech.length; a++)
+			{
+				if (dataSpeech[a].equals("masukkan")){
+					ngomong("menulis riwayat", 0.9f);
+					
+					String hasil = dataSpeech1.substring(16, dataSpeech1.length());
+					dbhelper.addNote(hasil, "");
+				}
+				if (dataSpeech[a].equals("tampilkan")){
+					startActivity(new Intent(this,MemRiwayat.class));
+				}
+				if (dataSpeech[a].equals("hapus")){
+					ngomong("tahan list list yang akan dihapus", 0.9f);
+					
+				}
+			}
 		}
 		
 	}
@@ -475,6 +534,24 @@ public class MainAsisten extends Activity
 	    	this.dialog.cancel();
 	    	txt.setText(result);
 	    }
+	}
+	
+	// mtod app external
+	public static boolean openApp(Context context, String packageName) {
+		PackageManager manager = context.getPackageManager();
+		try {
+			Intent i = manager.getLaunchIntentForPackage(packageName);
+			if (i == null) {
+				return false;
+				//throw new ActivityNotFoundException();
+			}
+			i.addCategory(Intent.CATEGORY_LAUNCHER);
+			context.startActivity(i);
+			return true;
+		} 
+		catch (ActivityNotFoundException e) {
+			return false;
+		}
 	}
 	
 }
