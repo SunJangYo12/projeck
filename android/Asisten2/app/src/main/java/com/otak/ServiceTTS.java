@@ -8,7 +8,8 @@ import android.util.*;
 import java.util.*;
 import android.widget.*;
 
-public class ServiceTTS extends Service implements TextToSpeech.OnInitListener{
+public class ServiceTTS extends Service implements TextToSpeech.OnInitListener
+{
 
 	public static String str;
 	public static float cepat = 0.5f;
@@ -46,7 +47,7 @@ public class ServiceTTS extends Service implements TextToSpeech.OnInitListener{
 		sayHello(str);
 		super.onStart(intent, startId);
 	}
-
+	
 	@Override
 	public void onInit(int status) 
 	{

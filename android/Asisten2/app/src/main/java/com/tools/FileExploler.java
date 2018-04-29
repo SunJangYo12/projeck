@@ -64,39 +64,31 @@ public class FileExploler extends ListActivity
 				{
 					folder = "sdcard1";
 				}
+				if (getIntent().getStringExtra("memori").equals("in"))
+				{
+					folder = "sdcard0";
+				}
 			}
-			catch(Exception j){}
+			catch(Exception j){
+				folder ="sdcard0";
+			}
 			
 			if(getIntent().getStringExtra("index").equals("cari format")){
 				String command = exe.Executer("find /storage/"+folder+"/ -name *."+getIntent().getStringExtra("format"));
 				hasilFind = command.split("\n");
 				
-				if (new ReceiverBoot().layar == 1){
-					Intent main = new Intent(this, MainAsisten.class);
-					main.putExtra("startDengar","");
-					startActivity(main);
-				}
-				else {
-					ngomong("pencarian file format"+getIntent().getStringExtra("format")+", selesai", 0.8f);
+				//ngomong("pencarian file format"+getIntent().getStringExtra("format")+", selesai", 0.8f);
 					
-					outCari("format "+getIntent().getStringExtra("format"));
-				}
+				outCari("format "+getIntent().getStringExtra("format"));
 				
 			}
 			else if (getIntent().getStringExtra("index").equals("cari nama")){
 				String command = exe.Executer("find /storage/"+folder+"/ -iname *"+getIntent().getStringExtra("isi")+"*");
 				hasilFind = command.split("\n");
 				
-				if (new ReceiverBoot().layar == 1){
-					Intent main = new Intent(this, MainAsisten.class);
-					main.putExtra("startDengar","");
-					startActivity(main);
-				}
-				else {
-					ngomong("pencarian file bernama"+getIntent().getStringExtra("isi")+", selesai", 0.8f);
+				//ngomong("pencarian file bernama"+getIntent().getStringExtra("isi")+", selesai", 0.8f);
 					
-					outCari("nama "+getIntent().getStringExtra("isi"));
-				}
+			    outCari("nama "+getIntent().getStringExtra("isi"));
 			}
 		}catch(Exception g){}
     }

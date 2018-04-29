@@ -337,6 +337,12 @@ class VoiceHelper implements RecognitionListener
 		//Log.d(TAG, "error " + error);		
 		mVoiceRecognition.txt.setText("error " + error);
 		mVoiceRecognition.keluaran("eror");
+		new Handler().postDelayed(new Runnable() {
+				@Override
+				public void run() {
+					listenAgain();
+				}
+			},100);
 	}
 	public void onEvent(int eventType, Bundle params) {
 		//Log.d(TAG, "onEvent " + eventType);

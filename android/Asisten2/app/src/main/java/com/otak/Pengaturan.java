@@ -14,6 +14,7 @@ public class Pengaturan extends Activity
 {
 	Button btnTelinga, aSave, btnMulut, btnDir, btnCuaca;
 	Switch swMicControl, swSuaraControl;
+	EditText edCuaca, edCuaca1;
 	public TextToSpeech textToSpeech;
 	EditText ed;
 	RadioButton radioB, radioB2;
@@ -41,7 +42,7 @@ public class Pengaturan extends Activity
 		settings = getSharedPreferences("Settings", 0);	
 		
 		swMicControl = (Switch)findViewById(R.id.run_service);
-		swMicControl.setChecked(settings.getBoolean("Mic Control",false));
+		swMicControl.setChecked(settings.getBoolean("mode hemat",false));
 		swMicControl.setOnClickListener(new View.OnClickListener()
 			{
 				public void onClick(View v){
@@ -99,6 +100,24 @@ public class Pengaturan extends Activity
 					//telinga(3);
 					startActivity(new Intent(Pengaturan.this, FileExploler.class));
 
+				}
+			});
+		edCuaca = (EditText)findViewById(R.id.cuaEdit);
+	   	edCuaca1 = (EditText)findViewById(R.id.cuaEdit1);
+		
+		edCuaca.setText(settings.getString("cuaTempat",""));
+		edCuaca1.setText(settings.getString("cuaNegara",""));
+		
+		btnCuaca = (Button)findViewById(R.id.btnCua);
+		btnCuaca.setOnClickListener(new View.OnClickListener()
+			{
+				public void onClick(View v){
+					SharedPreferences.Editor editor = settings.edit();	
+					editor.putString("cuaNegara", edCuaca1.getText().toString());	
+					editor.putString("cuaTempat", edCuaca.getText().toString());	
+					Toast.makeText(getApplicationContext(),"Negara : "+settings.getString("cuaNegara","")+"\nTempat : "+settings.getString("cuaTempat",""),Toast.LENGTH_LONG).show();
+					editor.commit();
+					
 				}
 			});
 	}

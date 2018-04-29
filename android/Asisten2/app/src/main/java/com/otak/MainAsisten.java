@@ -26,8 +26,10 @@ import java.io.*;
 import android.util.*;
 import android.content.pm.*;
 import com.otak.memori.*;
+import android.speech.tts.*;
+import java.util.*;
 
-public class MainAsisten extends Activity
+public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 { 
 	public String text;
 	private SpeechRecognizerManager mSpeechManager;
@@ -50,11 +52,20 @@ public class MainAsisten extends Activity
 	private DBHelper dbhelper;
 	int judul = 0;
 	
+	private boolean initialized;
+	private String queuedText;
+	private String TAG = "TTS";
+	private TextToSpeech tts;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
+		
+		tts = new TextToSpeech(this /* context */, this /* listener */);
+		tts.setOnUtteranceProgressListener(mProgressListener);
+
 		
 		settings = getSharedPreferences("Settings", 0);	
 		addSettings = settings.edit();
@@ -62,10 +73,13 @@ public class MainAsisten extends Activity
 		mVibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
 	    txt = (TextView)findViewById(R.id.main_text);
 		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		
+		dbhelper = new DBHelper(getApplicationContext());
+	
 		try{
+			
 			if (getIntent().getStringExtra("layar").equals("off"))
 			{
+				
 				if(mSpeechManager==null)
 				{
 					SetSpeechListener();
@@ -75,20 +89,20 @@ public class MainAsisten extends Activity
 					mSpeechManager.destroy();
 					SetSpeechListener();
 				}
-				
-			
 			}
 
 		}
 		catch(Exception e){
 			
 		}
+		startService(new Intent(getBaseContext(), ServiceTTS.class));
 		
 		btn = (Button)findViewById(R.id.main_btn);
 		btn.setOnClickListener(new View.OnClickListener()
 		{
 			public void onClick(View v){
 				btn.setClickable(false);
+				
 				if(mSpeechManager==null)
 				{
 					SetSpeechListener();
@@ -151,14 +165,16 @@ public class MainAsisten extends Activity
 					if(results!=null && results.size()>0)
 					{
 						
-						Toast.makeText(MainAsisten.this,"hsj",Toast.LENGTH_LONG).show();
-						
 						if(results.size()==1)
 						{
 							mSpeechManager.destroy();
 							mSpeechManager = null;
 							txt.setText(results.get(0));
 							keluaran(results.get(0));
+							
+							if (results.size()>=3){
+								dbhelper.addNote(results.get(0),"");
+							}
 						}
 						else {
 							StringBuilder sb = new StringBuilder();
@@ -180,9 +196,12 @@ public class MainAsisten extends Activity
 	
 	public void ngomong(String data, float cepat)
 	{
-		sertt.cepat = cepat;
-		sertt.str = data;
-		startService(new Intent(this, ServiceTTS.class));
+		SharedPreferences.Editor editor = settings.edit();	
+		editor.putBoolean("ctrMic", false);	
+		editor.commit();
+		
+		tts.setSpeechRate(cepat);
+		speak(data);
 	}
 	
 
@@ -218,15 +237,35 @@ public class MainAsisten extends Activity
 	{
 		if (dataSpeech[index].equals("cuaca"))
 		{
-			// antri
 			for(int a=0; a<dataSpeech.length; a++){
 				if (dataSpeech[a].equals("di"))
 				{
+					SharedPreferences.Editor editor = settings.edit();	
+					editor.putString("cuaTempat", dataSpeech1.substring(9, dataSpeech1.length()));	
+					editor.commit();
+				}
+				if (dataSpeech[a].equals("refresh")){
+					String negara = settings.getString("cuaNegara","");
+					String tempat = settings.getString("cuaTempat","");
+					
+					String url = surl+"?negara="+negara+"&tempat="+tempat;
+					
 					CallWebPageTask task = new CallWebPageTask();
 					task.applicationContext = MainAsisten.this;
-					String url = surl+"?negara="+"indonesia"+"&tempat="+"";
 					task.execute(new String[] { url });
 					
+					ngomong("baik tuan. cuaca direfresh. silahkan tunggu",0.9f);
+				}
+				if (dataSpeech[a].equals("hari")){
+					for (int b=0; b<dataSpeech.length; b++)
+					{
+						if (dataSpeech[b].equals("ini")){
+							
+						}
+						if (dataSpeech[b].equals("besok")){
+
+						}
+					}
 				}
 			}	
 		}
@@ -271,30 +310,6 @@ public class MainAsisten extends Activity
 			}
 			
 		}
-		if (dataSpeech[index].equals("suara")){
-			if(settings.getBoolean("suara",true)){
-				editor.putBoolean("suara", false);	
-				editor.commit();
-				Toast.makeText(this,"on",Toast.LENGTH_LONG).show();
-				mAudioManager.setStreamMute(AudioManager.STREAM_NOTIFICATION, true);
-				mAudioManager.setStreamMute(AudioManager.STREAM_ALARM, true);
-				mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
-				mAudioManager.setStreamMute(AudioManager.STREAM_RING, true);
-				mAudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, true);
-	    	}
-			else{
-				editor.putBoolean("suara", true);	
-				editor.commit();
-				Toast.makeText(this,"zzzzzzz",Toast.LENGTH_LONG).show();
-
-				mAudioManager.setStreamMute(AudioManager.STREAM_NOTIFICATION, false);
-				mAudioManager.setStreamMute(AudioManager.STREAM_ALARM, false);
-				mAudioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
-				mAudioManager.setStreamMute(AudioManager.STREAM_RING, false);
-				mAudioManager.setStreamMute(AudioManager.STREAM_SYSTEM, false);
-				
-			}
-		}
 		
 	}
 
@@ -310,22 +325,27 @@ public class MainAsisten extends Activity
 		}
 		if (dataSpeech[index].equals("istirahat")){
 			ngomong("sistem stenbay", 0.9f);
+			if(mSpeechManager!=null)
+			{
+				Toast.makeText(this,"destroy", Toast.LENGTH_LONG).show();
+				mSpeechManager.destroy();
+				mSpeechManager = null;
+			}
 			finish();
 		}
 		if (dataSpeech[index].equals("buku")){
-			if (openApp(this, "org.kiwix.kiwixmobile")){
-				startActivity(new Intent(this,MemRiwayat.class));
 			
+			if (openApp(this, "org.kiwix.kiwixmobile")){
+				
 				Toast.makeText(this,"sukses",Toast.LENGTH_LONG).show();
 			}
 			else{
-				Toast.makeText(this,"buku gagal",Toast.LENGTH_LONG).show();
+				Toast.makeText(this,"buku gagal silahkan download kiwix.apk",Toast.LENGTH_LONG).show();
 				
 			}
 		}
 		if (dataSpeech[index].equals("riwayat")){
-			dbhelper = new DBHelper(getApplicationContext());
-		
+			
 			for (int a=0; a<dataSpeech.length; a++)
 			{
 				if (dataSpeech[a].equals("masukkan")){
@@ -391,9 +411,22 @@ public class MainAsisten extends Activity
 					ngomong("ini status aplikasi yang berjalan, mas", 0.8f);
 					startActivity(new Intent(this, TaskList.class));
 				}
+				if (dataSpeech[b].equals("baterai")){
+					for (int c=0; c<dataSpeech.length; c++)
+					{
+						if (dataSpeech[c].equals("tegangan")){
+							ngomong("tegangan baterai = "+new ReceiverBoot().dataVolt,0.9f);
+						}
+						if (dataSpeech[c].equals("arus")){
+							ngomong("arus baterai= "+new ReceiverBoot().dataAmp,0.9f);
+						}
+						if (dataSpeech[c].equals("suhu")){
+							ngomong("suhu baterai = "+new ReceiverBoot().dataTemp,0.9f);
+						}
+					}
+				}
 			}
 			if (tempStatus.equals("")){
-				ngomong("status ponsel ditampilkan", 1.0f);
 				startActivity(new Intent(this, ActivityStatus.class));
 			}
 		}
@@ -425,14 +458,16 @@ public class MainAsisten extends Activity
 							{
 								inama.putExtra("isi",dataSpeech[3]);
 							}
-							
-							try{
-								inama.putExtra("memori","ex");
-								ngomongMemori = "di External memori";
+							for (int f=0; f<dataSpeech.length; f++)
+							{
+								if (dataSpeech[f].equals("external")){
+									inama.putExtra("memori","ex");
+								}
+								if (dataSpeech[f].equals("internal")){
+									inama.putExtra("memori","in");
+								}
 							}
-							catch(Exception h){}
-							
-							ngomong("file "+dataSpeech[3]+", sedang dicari "+ngomongMemori,0.8f);
+							ngomong("file "+dataSpeech[3]+", sedang dicari "+ngomongMemori,0.9f);
 							
 							inama.putExtra("index","cari nama");
 							startActivity(inama);
@@ -449,11 +484,16 @@ public class MainAsisten extends Activity
 										
 										Intent iformat = new Intent(MainAsisten.this, FileExploler.class);
 										String ngomongMemori = "";
-										try{
-											iformat.putExtra("memori","ex");
-											ngomongMemori = "di External memori";
+										
+										for (int f=0; f<dataSpeech.length; f++)
+										{
+											if (dataSpeech[f].equals("external")){
+												iformat.putExtra("memori","ex");
+											}
+											if (dataSpeech[f].equals("internal")){
+												iformat.putExtra("memori","in");
+											}
 										}
-										catch(Exception h){}
 										ngomong("file "+format[fe]+", sedang dicari "+ngomongMemori, 1.0f);
 										
 										iformat.putExtra("format",format[fe]);
@@ -554,13 +594,85 @@ public class MainAsisten extends Activity
 		}
 	}
 	
+	public void speak(String text) { 
+
+		if (!initialized) {
+			queuedText = text;
+			return;
+		}
+		queuedText = null;
+
+		HashMap<String, String> map = new HashMap<String, String>();
+		map.put(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "MessageId");
+		tts.speak(text, TextToSpeech.QUEUE_ADD, map);
+	}
+	
+	@Override
+	public void onInit(int status) {
+		if (status == TextToSpeech.SUCCESS) {
+			initialized = true;
+			tts.setLanguage(Locale.getDefault());
+
+			if (queuedText != null) {
+				speak(queuedText);
+			}
+		}
+	}
+	
+	// tts
+	private abstract class runnable implements Runnable {
+	}
+	
+	// tts
+	private UtteranceProgressListener mProgressListener = new UtteranceProgressListener() {
+		@Override
+		public void onStart(String utteranceId) {
+		} // Do nothing
+
+		@Override
+		public void onError(String utteranceId) {
+		} // Do nothing.
+
+		@Override
+		public void onDone(String utteranceId) {
+
+			new Thread()
+			{
+				public void run()
+				{
+					MainAsisten.this.runOnUiThread(new runnable()
+						{
+							public void run()
+							{
+
+								Toast.makeText(getBaseContext(), "TTS Completed", Toast.LENGTH_SHORT).show();
+								SharedPreferences.Editor editor = settings.edit();	
+								editor.putBoolean("ctrMic", true);	
+								editor.commit();
+								
+								if(mSpeechManager==null)
+								{
+									SetSpeechListener();
+								}
+								else if(!mSpeechManager.ismIsListening())
+								{
+									mSpeechManager.destroy();
+									SetSpeechListener();
+								}
+							}
+						});
+				}
+			}.start();
+
+		}
+	}; 
 }
 
 
 class SpeechRecognizerManager {
 
     protected SpeechRecognizer mSpeechRecognizer;
-    protected Intent mSpeechRecognizerIntent;
+    protected Intent intent;
 
     protected boolean mIsListening;
     private boolean mIsStreamSolo; 
@@ -587,11 +699,11 @@ class SpeechRecognizerManager {
         }
         mSpeechRecognizer = SpeechRecognizer.createSpeechRecognizer(context);
         mSpeechRecognizer.setRecognitionListener(new SpeechRecognitionListener());
-        mSpeechRecognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-										 RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-        mSpeechRecognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
-										 context.getPackageName());
+		
+        intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault());
+		
         startListening();
 
     }
@@ -601,7 +713,10 @@ class SpeechRecognizerManager {
         if(mIsListening) {
             mIsListening = false;
             mSpeechRecognizer.cancel();
-            startListening();
+			if(settings.getBoolean("ctrMic",true)){
+				startListening();
+			}
+        
         }
     }
 
@@ -615,16 +730,12 @@ class SpeechRecognizerManager {
                 // turn off beep sound
                 
             }
-            mSpeechRecognizer.startListening(mSpeechRecognizerIntent);
+            mSpeechRecognizer.startListening(intent);
         }
     }
 
     public void destroy()
     {
-        mIsListening=false;
-        if (!mIsStreamSolo) {
-                    mIsStreamSolo = true;
-        }
         if (mSpeechRecognizer != null)
         {
             mSpeechRecognizer.stopListening();
@@ -680,13 +791,12 @@ class SpeechRecognizerManager {
                     mListener.onResults(errorList);
             }
             Log.d(TAG, "error = " + error);
-            new Handler().postDelayed(new Runnable() {
+           	new Handler().postDelayed(new Runnable() {
 					@Override
 					public void run() {
 						listenAgain();
 					}
 				},100);
-
 
         }
 

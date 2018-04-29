@@ -22,6 +22,7 @@ import com.otak.input.MicHelper;
 import android.os.*;
 import com.status.*;
 import android.app.*;
+import android.media.*;
 
 public class ReceiverBoot extends BroadcastReceiver
 {
@@ -30,24 +31,30 @@ public class ReceiverBoot extends BroadcastReceiver
 	private Toast toast;
 	Intent pengi, komi, maini;
 	PendingIntent pengp, kompp, mainp;
-	public static int layar;
 	SharedPreferences settings;
+	protected AudioManager mAudioManager;
+	
+	public static String dataTemp = "";
+	public static String dataVolt = "";
+	public static String dataAmp = "";
 	
 	@Override
 	public void onReceive(Context context, Intent intent)
 	{
 		this.context = context;
 		settings = context.getSharedPreferences("Settings", 0);	
-	
+		mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+		
 		if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF))
 		{
-			if (settings.getBoolean("mode hemat", true)){
+			if (settings.getBoolean("mode hemat", false)){
 				Intent mIntent = new Intent(context, MainAsisten.class);
 				mIntent.putExtra("layar","off");
 				mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 				context.startActivity(mIntent);
 			}
 		}
+	
 		if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED))
 		{
 			context.startService(new Intent(context, ServiceBoot.class));
@@ -72,9 +79,9 @@ public class ReceiverBoot extends BroadcastReceiver
 			float BatteryTemp = (float)(intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE,0))/10;
 			float voltase     = (float)(intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0))/100;
 			
-			String dataTemp = ""+BatteryTemp+(char)0x00B0+"C";
-			String dataVolt = ""+voltase+" V";
-			String dataAmp  = ""+b[0]+" mA";
+			dataTemp = ""+BatteryTemp+(char)0x00B0+"C";
+			dataVolt = ""+voltase+" V";
+			dataAmp  = ""+b[0]+" mA";
 
 			notifiBoot(context, dataVolt, dataTemp, dataAmp);
 			
