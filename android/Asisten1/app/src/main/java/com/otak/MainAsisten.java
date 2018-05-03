@@ -340,7 +340,10 @@ class VoiceHelper implements RecognitionListener
 		new Handler().postDelayed(new Runnable() {
 				@Override
 				public void run() {
-					listenAgain();
+					Intent intentV = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+					intentV.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+					mVoiceRecognition.micApi.startListening(intentV);
+					
 				}
 			},100);
 	}

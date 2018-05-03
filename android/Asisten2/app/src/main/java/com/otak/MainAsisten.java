@@ -28,6 +28,7 @@ import android.content.pm.*;
 import com.otak.memori.*;
 import android.speech.tts.*;
 import java.util.*;
+import android.database.sqlite.*;
 
 public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 { 
@@ -46,16 +47,15 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 	ServiceTTS sertt;
 	TextView txt;
 	Button btn;
-	String ulangi, ngobrol;
-	private String surl = "https://sunjangyo12.000webhostapp.com/cuaca.php/";
+	String ulangi, ngobrol; 
 	protected AudioManager mAudioManager;
-	private DBHelper dbhelper;
+	
 	int judul = 0;
 	
 	private boolean initialized;
 	private String queuedText;
-	private String TAG = "TTS";
 	private TextToSpeech tts;
+	private String kata;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -73,8 +73,7 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 		mVibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
 	    txt = (TextView)findViewById(R.id.main_text);
 		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		dbhelper = new DBHelper(getApplicationContext());
-	
+		
 		try{
 			
 			if (getIntent().getStringExtra("layar").equals("off"))
@@ -89,6 +88,10 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 					mSpeechManager.destroy();
 					SetSpeechListener();
 				}
+			}
+			if (getIntent().getStringExtra("layar").equals("on"))
+			{
+				finish();
 			}
 
 		}
@@ -143,6 +146,8 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 	{
 		// TODO: Implement this method
 		super.onDestroy();
+		
+		
 		if(mSpeechManager!=null)
 		{
 			Toast.makeText(this,"destroy", Toast.LENGTH_LONG).show();
@@ -151,7 +156,7 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 		}
 	}
 	
-
+ 
 
 	
 	private void SetSpeechListener()
@@ -172,9 +177,6 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 							txt.setText(results.get(0));
 							keluaran(results.get(0));
 							
-							if (results.size()>=3){
-								dbhelper.addNote(results.get(0),"");
-							}
 						}
 						else {
 							StringBuilder sb = new StringBuilder();
@@ -219,6 +221,8 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 
 	public void keluaran(String data)
 	{
+		//dbhelper.addNote(data,"data");
+		
 		dataSpeech = data.split(" ");
 		dataSpeech1 = data;
 		temp = "";
@@ -237,6 +241,7 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 	{
 		if (dataSpeech[index].equals("cuaca"))
 		{
+			
 			for(int a=0; a<dataSpeech.length; a++){
 				if (dataSpeech[a].equals("di"))
 				{
@@ -247,12 +252,13 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 				if (dataSpeech[a].equals("refresh")){
 					String negara = settings.getString("cuaNegara","");
 					String tempat = settings.getString("cuaTempat","");
-					
+					String surl = "https://sunjangyo12.000webhostapp.com/cuaca.php/";
 					String url = surl+"?negara="+negara+"&tempat="+tempat;
 					
 					CallWebPageTask task = new CallWebPageTask();
 					task.applicationContext = MainAsisten.this;
 					task.execute(new String[] { url });
+					
 					
 					ngomong("baik tuan. cuaca direfresh. silahkan tunggu",0.9f);
 				}
@@ -352,10 +358,14 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 					ngomong("menulis riwayat", 0.9f);
 					
 					String hasil = dataSpeech1.substring(16, dataSpeech1.length());
-					dbhelper.addNote(hasil, "");
+					
+					DBHelper dbhelper = new DBHelper(this);
+					SQLiteDatabase sqdb = dbhelper.getWritableDatabase();
+					sqdb.execSQL("insert into otak(no, cuaca, riwayat, memori) VALUES (
+					
 				}
 				if (dataSpeech[a].equals("tampilkan")){
-					startActivity(new Intent(this,MemRiwayat.class));
+					startActivity(new Intent(this,ActivityRiwayat.class));
 				}
 				if (dataSpeech[a].equals("hapus")){
 					ngomong("tahan list list yang akan dihapus", 0.9f);
@@ -573,6 +583,7 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 	    protected void onPostExecute(String result) {
 	    	this.dialog.cancel();
 	    	txt.setText(result);
+			dbhelper.addNote("cuaca",result);
 	    }
 	}
 	

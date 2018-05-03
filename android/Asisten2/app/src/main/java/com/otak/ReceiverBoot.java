@@ -54,6 +54,15 @@ public class ReceiverBoot extends BroadcastReceiver
 				context.startActivity(mIntent);
 			}
 		}
+		if (intent.getAction().equals(Intent.ACTION_SCREEN_ON))
+		{
+			if (settings.getBoolean("mode hemat", false)){
+				Intent mIntent = new Intent(context, MainAsisten.class);
+				mIntent.putExtra("layar","on");
+				mIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(mIntent);
+			}
+		}
 	
 		if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED))
 		{

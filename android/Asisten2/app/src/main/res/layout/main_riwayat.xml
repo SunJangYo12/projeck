@@ -1,7 +1,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-	android:background="#aaD08100"
+	android:background="#AA503500"
     android:orientation="vertical">
     <ListView
         android:id="@+id/riwList"

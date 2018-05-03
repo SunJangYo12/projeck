@@ -30,7 +30,7 @@
 			android:name="com.status.TaskList" >
 		</activity>
 		<activity
-			android:name="com.otak.memori.MemRiwayat" >
+			android:name="com.otak.memori.ActivityRiwayat" >
 		</activity>
 		<activity
 			android:name="MainAsisten" >
