@@ -15,6 +15,9 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 import com.otak.*;
+import android.view.*;
+import android.content.*;
+import android.widget.*;
 
 public class MemoriActivity extends Activity
 {
@@ -22,7 +25,8 @@ public class MemoriActivity extends Activity
     ListView ListView01;
     protected Cursor cursor;
     DBHelper dbhelper;
-    
+    EditText ed;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -31,16 +35,17 @@ public class MemoriActivity extends Activity
 		setContentView(R.layout.main_riwayat);
 		
 		dbhelper = new DBHelper(this);
+		init();
 	}
 	
-	public void RefreshList(){
+	public void init(){
         SQLiteDatabase db = dbhelper.getReadableDatabase();
         cursor = db.rawQuery("SELECT * FROM otak",null);
         daftar = new String[cursor.getCount()];
         cursor.moveToFirst();
         for (int cc=0; cc < cursor.getCount(); cc++){
             cursor.moveToPosition(cc);
-            daftar[cc] = cursor.getString(1).toString();
+            daftar[cc] = cursor.getString(0).toString();
         }
         ListView01 = (ListView)findViewById(R.id.riwList);
         ListView01.setAdapter(new ArrayAdapter(this, android.R.layout.simple_list_item_1, daftar));
@@ -50,26 +55,51 @@ public class MemoriActivity extends Activity
 
 				public void onItemClick(AdapterView arg0, View arg1, int arg2, long arg3) {
 					final String selection = daftar[arg2]; //.getItemAtPosition(arg2).toString();
-					final CharSequence[] dialogitem = {"Lihat Biodata", "Update Biodata", "Hapus Biodata"};
+					final CharSequence[] dialogitem = {"Edit", "Hapus"};
 					AlertDialog.Builder builder = new AlertDialog.Builder(MemoriActivity.this);
 					builder.setTitle("Pilihan");
 					builder.setItems(dialogitem, new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int item) {
 								switch(item){
 									case 0 :
-										Intent i = new Intent(getApplicationContext(), LihatBiodata.class);
-										i.putExtra("nama", selection);
-										startActivity(i);
+										SQLiteDatabase db = dbhelper.getReadableDatabase();
+										cursor = db.rawQuery("SELECT * FROM otak WHERE cuaca = '" +selection+ "'",null);
+										cursor.moveToFirst();
+										if (cursor.getCount()>0)
+										{
+											cursor.moveToPosition(0);
+											Toast.makeText(MemoriActivity.this,""+cursor.getString(2).toString(),Toast.LENGTH_LONG).show();
+										}
+										
+										AlertDialog.Builder builder1 = new AlertDialog.Builder(MemoriActivity.this);
+										builder1.setTitle("       Edit          ");
+										builder1.setCancelable(true);
+
+										LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE );
+										View layout = inflater.inflate(R.layout.alert_memori, null);
+
+										ed = (EditText) layout.findViewById(R.id.amEdit);
+										Button bt = (Button) layout.findViewById(R.id.amButton);
+										bt.setOnClickListener(new View.OnClickListener()
+										{
+											public void onClick(View v)
+											{
+												SQLiteDatabase dbs = dbhelper.getWritableDatabase();
+												dbs.execSQL("update otak set cuaca='"+ed.getText().toString()+"'");
+												Toast.makeText(getApplicationContext(), "Berhasil", Toast.LENGTH_LONG).show();
+												ed.setText("");
+												
+											}
+										});
+										builder1.setView(layout);
+
+	                                	AlertDialog alert11 = builder1.create();
+	                                	alert11.show();
 										break;
 									case 1 :
-										Intent in = new Intent(getApplicationContext(), UpdateBiodata.class);
-										in.putExtra("nama", selection);
-										startActivity(in);
-										break;
-									case 2 :
-										SQLiteDatabase db = dbhelper.getWritableDatabase();
-										db.execSQL("delete from otak where nama = '"+selection+"'");
-										RefreshList();
+										SQLiteDatabase dbf = dbhelper.getWritableDatabase();
+										dbf.execSQL("delete from otak where cuaca = '"+selection+"'");
+										init();
 										break;
 								}
 							}

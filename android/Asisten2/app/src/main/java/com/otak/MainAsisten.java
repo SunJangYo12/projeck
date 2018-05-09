@@ -29,6 +29,8 @@ import com.otak.memori.*;
 import android.speech.tts.*;
 import java.util.*;
 import android.database.sqlite.*;
+import android.database.*;
+import android.net.*;
 
 public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 { 
@@ -56,6 +58,9 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 	private String queuedText;
 	private TextToSpeech tts;
 	private String kata;
+	DBHelper dbhelper;
+	private int no;
+	protected Cursor cursor;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
@@ -63,22 +68,37 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		
-		tts = new TextToSpeech(this /* context */, this /* listener */);
-		tts.setOnUtteranceProgressListener(mProgressListener);
+		btn = (Button)findViewById(R.id.main_btn);
+		btn.setOnClickListener(new View.OnClickListener()
+			{
+				public void onClick(View v){
+					btn.setClickable(false);
 
+					if(mSpeechManager==null)
+					{
+						SetSpeechListener();
+					}
+					else if(!mSpeechManager.ismIsListening())
+					{
+						mSpeechManager.destroy();
+						SetSpeechListener();
+					}
+					txt.setText("Voice Siap ..");
+
+				}
+			});
 		
 		settings = getSharedPreferences("Settings", 0);	
 		addSettings = settings.edit();
+		no = settings.getInt("no memori",0);
 		
 		mVibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
 	    txt = (TextView)findViewById(R.id.main_text);
 		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		
 		try{
-			
 			if (getIntent().getStringExtra("layar").equals("off"))
 			{
-				
 				if(mSpeechManager==null)
 				{
 					SetSpeechListener();
@@ -93,32 +113,8 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 			{
 				finish();
 			}
-
 		}
-		catch(Exception e){
-			
-		}
-		startService(new Intent(getBaseContext(), ServiceTTS.class));
-		
-		btn = (Button)findViewById(R.id.main_btn);
-		btn.setOnClickListener(new View.OnClickListener()
-		{
-			public void onClick(View v){
-				btn.setClickable(false);
-				
-				if(mSpeechManager==null)
-				{
-					SetSpeechListener();
-				}
-				else if(!mSpeechManager.ismIsListening())
-				{
-					mSpeechManager.destroy();
-					SetSpeechListener();
-				}
-				txt.setText("Voice Siap ..");
-			
-			}
-		});
+		catch(Exception e){}
 	}
 
 	@Override
@@ -126,6 +122,8 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 	{
 		// TODO: Implement this method
 		super.onPause();
+		startService(new Intent(getBaseContext(), ServiceTTS.class));
+		
 	}
 
 	@Override
@@ -146,14 +144,16 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 	{
 		// TODO: Implement this method
 		super.onDestroy();
-		
-		
+		addSettings.putInt("no memori", no);	
+		addSettings.commit();
 		if(mSpeechManager!=null)
 		{
 			Toast.makeText(this,"destroy", Toast.LENGTH_LONG).show();
 			mSpeechManager.destroy();
 			mSpeechManager = null;
 		}
+		startService(new Intent(getBaseContext(), ServiceTTS.class));
+		
 	}
 	
  
@@ -221,8 +221,16 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 
 	public void keluaran(String data)
 	{
-		//dbhelper.addNote(data,"data");
+		no++;
+		dbhelper = new DBHelper(this);
+		tts = new TextToSpeech(this /* context */, this /* listener */);
+		tts.setOnUtteranceProgressListener(mProgressListener);
 		
+		Toast.makeText(this,""+no,Toast.LENGTH_LONG).show();
+	
+		SQLiteDatabase dbk = dbhelper.getWritableDatabase();
+		dbk.execSQL("INSERT INTO otak (no, memori) VALUES ('"+no+"', '"+data+"');");
+	
 		dataSpeech = data.split(" ");
 		dataSpeech1 = data;
 		temp = "";
@@ -310,9 +318,10 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 				editor.commit();
 			}
 			else{
-				ngomong("melakukan reboot pendengaran", 0.9f);
 				editor.putBoolean("mode hemat", true);	
 				editor.commit();
+				ngomong("melakukan reboot pendengaran", 0.9f);
+		
 			}
 			
 		}
@@ -321,7 +330,7 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 
 	private void outNgobrol(int index)
 	{
-	
+		
 		if (dataSpeech[index].equals("halo")){
 			ngomong("ya halo selamat malam mas", 0.9f);
 		}
@@ -350,8 +359,15 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 				
 			}
 		}
+		if (dataSpeech[index].equals("musik")){
+			Intent intent = new Intent();  
+			intent.setAction(android.content.Intent.ACTION_VIEW);  
+			intent.setDataAndType(Uri.parse("sdcard1/audio"), "audio/*");  
+			startActivity(intent);
+		}
+		
 		if (dataSpeech[index].equals("riwayat")){
-			
+			no++;
 			for (int a=0; a<dataSpeech.length; a++)
 			{
 				if (dataSpeech[a].equals("masukkan")){
@@ -359,13 +375,14 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 					
 					String hasil = dataSpeech1.substring(16, dataSpeech1.length());
 					
-					DBHelper dbhelper = new DBHelper(this);
-					SQLiteDatabase sqdb = dbhelper.getWritableDatabase();
-					sqdb.execSQL("insert into otak(no, cuaca, riwayat, memori) VALUES (
+					SQLiteDatabase dbk = dbhelper.getWritableDatabase();
+					dbk.execSQL("INSERT INTO otak (no, riwayat) VALUES ('"+no+"', '"+hasil+"');");
+					
+					Toast.makeText(getApplicationContext(), "Berhasil"+hasil, Toast.LENGTH_LONG).show();
 					
 				}
 				if (dataSpeech[a].equals("tampilkan")){
-					startActivity(new Intent(this,ActivityRiwayat.class));
+					startActivity(new Intent(this,MemoriActivity.class));
 				}
 				if (dataSpeech[a].equals("hapus")){
 					ngomong("tahan list list yang akan dihapus", 0.9f);
@@ -583,8 +600,12 @@ public class MainAsisten extends Activity implements TextToSpeech.OnInitListener
 	    protected void onPostExecute(String result) {
 	    	this.dialog.cancel();
 	    	txt.setText(result);
-			dbhelper.addNote("cuaca",result);
-	    }
+			
+			SQLiteDatabase dbk = dbhelper.getWritableDatabase();
+			dbk.execSQL("INSERT INTO otak (no, cuaca) VALUES ('"+no+"', '"+result+"');");
+
+			Toast.makeText(getApplicationContext(), "Berhasil", Toast.LENGTH_LONG).show();
+		}
 	}
 	
 	// mtod app external

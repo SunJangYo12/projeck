@@ -19,8 +19,8 @@ public class DBHelper extends SQLiteOpenHelper {
         String sql = "create table otak(no integer primary key, cuaca text null, riwayat text null, memori text null);";
         
 		db.execSQL(sql);
-        sql = "INSERT INTO biodata (no, cuaca, riwayat, memori) VALUES ('1', 'kosong', 'kosong', 'kosong');";
-        db.execSQL(sql);
+        sql = "INSERT INTO otak (no, cuaca, riwayat, memori) VALUES ('1', 'kosong', 'kosong', 'kosong');";
+        //db.execSQL(sql);
 
     }
 

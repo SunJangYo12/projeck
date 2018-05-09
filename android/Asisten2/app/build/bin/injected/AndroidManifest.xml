@@ -62,7 +62,7 @@
 		</activity>
 
 		<activity
-			android:name="com.otak.memori.ActivityRiwayat">
+			android:name="com.otak.memori.MemoriActivity">
 
 		</activity>
 
