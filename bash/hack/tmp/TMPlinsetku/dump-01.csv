@@ -1,0 +1,8 @@
+
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+64:70:02:5C:FD:24, 2018-07-16 11:14:45, 2018-07-16 11:15:07,  1,  54, WPA2WPA , CCMP,PSK, -78,       24,        0,   0.  0.  0.  0,  10, Hazza Wifi, 
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+20:5E:F7:60:FA:D6, 2018-07-16 11:14:51, 2018-07-16 11:14:51, -88,        2, (not associated) ,
+00:0A:F5:32:D6:84, 2018-07-16 11:15:02, 2018-07-16 11:15:07, -75,       16, 64:70:02:5C:FD:24, Hazza Wifi
+

