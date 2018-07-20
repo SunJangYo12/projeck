@@ -1,0 +1,6 @@
+
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+04:95:E6:03:1A:10, 2018-07-03 21:17:30, 2018-07-03 21:17:45,  1,  54, WPA2, CCMP,PSK, -83,       34,        0,   0.  0.  0.  0,   9, TAUFIK SH, 
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+

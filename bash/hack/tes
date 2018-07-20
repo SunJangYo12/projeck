@@ -1,7 +1,11 @@
 #!/bin/bash
 
-which iw > /dev/null 2>&1 && iw dev $1 info > /dev/null 2>&1 && return 0
-if which iwconfig > /dev/null 2>&1 && iwconfig $1 > /dev/null 2>&1; then
-    USE_IWCONFIG=1
-    return 0
+path="/home/shun/"
+ku=temp
+ls /home/shun/tmp
+
+if [ ! -d $path"$ku" ]; then
+    echo belum
+else
+	echo ada;
 fi

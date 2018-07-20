@@ -1,0 +1,10 @@
+
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+64:66:B3:EA:43:36, 2018-07-18 20:04:35, 2018-07-18 20:05:55,  1,  54, WPA2WPA , CCMP TKIP,PSK, -74,      774,       34,   0.  0.  0.  0,  16, SMP 3 WATUMALANG, 
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+FF:FF:FF:FF:FF:FF, 2018-07-18 20:04:37, 2018-07-18 20:05:51,   0,       44, 64:66:B3:EA:43:36,
+33:33:00:00:00:01, 2018-07-18 20:04:51, 2018-07-18 20:05:51,   0,        8, 64:66:B3:EA:43:36,
+01:00:0C:CC:CC:CC, 2018-07-18 20:04:51, 2018-07-18 20:05:51,   0,        8, 64:66:B3:EA:43:36,
+00:0A:F5:32:D6:84, 2018-07-18 20:05:05, 2018-07-18 20:05:47,   0,      121, 64:66:B3:EA:43:36, SMP 3 WATUMALANG
+

